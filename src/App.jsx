@@ -17,6 +17,7 @@ import Sidebar from './components/sidebar/Sidebar';
 import Dashboard from './components/views/dashboard';
 import {  Routes, Route, Navigate } from 'react-router-dom';
 import FoReg from './components/views/FoReg';
+import FoOp from './components/views/FoOp';
 
 function App() {
   
@@ -33,8 +34,8 @@ function App() {
                 <Route path="/" element={<Navigate to="/dashboard" />} /> 
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/RegFolder" element={<FoReg/>} />
-                {/* <Route path="/MissingF" element={<MissingF />} />
-                <Route path="/collector" element={<Collector/>} />
+                 <Route path="/FoOP" element={<FoOp />} />
+               {/* <Route path="/collector" element={<Collector/>} />
                 <Route path="/Management" element={<Management/>} />
                 <Route path="*" element={<Error404 />} /> */}
           </Routes>  

@@ -96,7 +96,7 @@ const Navbar = () => {
                 <p className="mb-0 font-weight-normal dropdown-header">
                   Notifications
                 </p>
-                <Link className="dropdown-item preview-item" to="/dashboard">
+                <Link className="dropdown-item preview-item" to="/FoOP">
                   <div className="preview-thumbnail">
                     <div className="preview-icon bg-success">
                       <i className="fas fa-info-circle mx-0 text-white"></i>
