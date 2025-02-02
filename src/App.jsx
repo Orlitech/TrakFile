@@ -19,6 +19,7 @@ import {  Routes, Route, Navigate } from 'react-router-dom';
 import FoReg from './components/views/FoReg';
 import FoOp from './components/views/FoOp';
 import FoMissing from './components/views/FoMissing';
+import FoCo from './components/views/FoCo';
 
 function App() {
   
@@ -37,8 +38,8 @@ function App() {
                 <Route path="/RegFolder" element={<FoReg/>} />
                  <Route path="/FoOP" element={<FoOp />} />
                 <Route path="/FoMissing" element={<FoMissing />} />
-               {/* <Route path="/Management" element={<Management/>} />
-                <Route path="*" element={<Error404 />} /> */}
+               <Route path="/FoCo" element={<FoCo/>} />
+               {/* <Route path="*" element={<Error404 />} /> */}
           </Routes>  
     </div>
     <Footer />
