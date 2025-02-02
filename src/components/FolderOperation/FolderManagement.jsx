@@ -206,8 +206,8 @@ function allcollectedfolders() {
 
   return (
     <div className="container mt-4">
-      <div class="card">
-      <div class="card-body">
+      <div className="card">
+      <div className="card-body">
       <h4 className="text-center mb-4">Folder Operation</h4>
       <div className="row mb-3">
         <div className="col-md-3">

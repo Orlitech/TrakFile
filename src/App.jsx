@@ -18,6 +18,7 @@ import Dashboard from './components/views/dashboard';
 import {  Routes, Route, Navigate } from 'react-router-dom';
 import FoReg from './components/views/FoReg';
 import FoOp from './components/views/FoOp';
+import FoMissing from './components/views/FoMissing';
 
 function App() {
   
@@ -35,8 +36,8 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/RegFolder" element={<FoReg/>} />
                  <Route path="/FoOP" element={<FoOp />} />
-               {/* <Route path="/collector" element={<Collector/>} />
-                <Route path="/Management" element={<Management/>} />
+                <Route path="/FoMissing" element={<FoMissing />} />
+               {/* <Route path="/Management" element={<Management/>} />
                 <Route path="*" element={<Error404 />} /> */}
           </Routes>  
     </div>
