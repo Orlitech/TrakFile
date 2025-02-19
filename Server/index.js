@@ -20,49 +20,54 @@ app.post('/assign', async (req, res) => {
     return res.status(400).json({ message: "Invalid input: 'folder_id' must be a non-empty array" });
   }
 
+  const client = await pool.connect();
+
   try {
-    // Start a transaction
-    await pool.query("BEGIN");
+    // Start transaction
+    await client.query("BEGIN");
 
-    const results = await Promise.all(
-      folder_id.map(async (folderId) => {
-        // Check the latest folder status
-        const statusQuery = `
-          SELECT COALESCE(
-            (SELECT folder_status FROM folder_transactions WHERE folder_id = $1 ORDER BY date_collected DESC LIMIT 1), 
-            'In Store'
-          ) AS folder_status;
-        `;
-        const statusResult = await pool.query(statusQuery, [folderId]);
-        const folderStatus = statusResult.rows[0].folder_status;
+    const assignedFolders = [];
 
-        // If folder is "Out Store", prevent assignment
-        if (folderStatus === 'Out Store') {
-          throw new Error(`Folder ID ${folderId} is currently 'Out Store' and cannot be assigned.`);
-        }
+    for (const folderId of folder_id) {
+      // Check the latest folder status
+      const statusQuery = `
+        SELECT folder_status 
+        FROM folder_transactions 
+        WHERE folder_id = $1 
+        ORDER BY date_collected DESC 
+        LIMIT 1;
+      `;
+      const statusResult = await client.query(statusQuery, [folderId]);
+      const folderStatus = statusResult.rows.length ? statusResult.rows[0].folder_status : 'In Store';
 
-        // Insert the new transaction
-        const insertQuery = `
-          INSERT INTO folder_transactions (folder_id, purpose_id, collectedby, date_collected, folder_status)
-          VALUES ($1, $2, $3, $4, 'Out Store') RETURNING folder_id;
-        `;
-        const insertResult = await pool.query(insertQuery, [folderId, purpose_id, collectedby, date_collected]);
+      // If folder is "Out Store", prevent assignment
+      if (folderStatus === 'Out Store') {
+        throw new Error(`Folder ID ${folderId} is currently 'Out Store' and cannot be assigned.`);
+      }
 
-        return insertResult.rows[0].folder_id;
-      })
-    );
+      // Insert new transaction
+      const insertQuery = `
+        INSERT INTO folder_transactions (folder_id, purpose_id, collectedby, date_collected, folder_status)
+        VALUES ($1, $2, $3, $4, 'Out Store') 
+        RETURNING folder_id;
+      `;
+      const insertResult = await client.query(insertQuery, [folderId, purpose_id, collectedby, date_collected]);
 
-    // Commit the transaction
-    await pool.query("COMMIT");
+      assignedFolders.push(insertResult.rows[0].folder_id);
+    }
 
-    res.status(200).json({ message: 'Folders assigned successfully', assignments: results });
+    // Commit transaction
+    await client.query("COMMIT");
+
+    return res.status(200).json({ message: 'Folders assigned successfully', assignments: assignedFolders });
   } catch (error) {
-    await pool.query("ROLLBACK"); // Rollback on error
+    await client.query("ROLLBACK"); // Rollback on error
     console.error('Error assigning folders:', error);
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
+  } finally {
+    client.release();
   }
 });
-
 
 
 // Return folder (mark it as returned)
@@ -74,38 +79,42 @@ app.post('/return-folder', async (req, res) => {
     return res.status(400).json({ message: "Invalid input: 'ftId' must be a non-empty array, and 'returnDate' is required." });
   }
 
+  const client = await pool.connect();
+
   try {
     // Start transaction
-    await pool.query("BEGIN");
+    await client.query("BEGIN");
 
-    // Process each ftId
-    const results = await Promise.all(
-      ftId.map(async (id) => {
-        const updateQuery = `
-          UPDATE folder_transactions
-          SET date_returned = $1, folder_status = 'In Store'
-          WHERE folder_id = $2 RETURNING folder_id;
-        `;
-        const updateResult = await pool.query(updateQuery, [returnDate, id]);
+    const returnedFolders = [];
 
-        if (updateResult.rowCount === 0) {
-          throw new Error(`Invalid ftId ${id}: No matching record found.`);
-        }
+    for (const id of ftId) {
+      const updateQuery = `
+        UPDATE folder_transactions
+        SET date_returned = $1, folder_status = 'In Store'
+        WHERE folder_id = $2 RETURNING folder_id;
+      `;
+      const updateResult = await client.query(updateQuery, [returnDate, id]);
 
-        return updateResult.rows[0].folder_id;
-      })
-    );
+      if (updateResult.rowCount === 0) {
+        throw new Error(`Invalid ftId ${id}: No matching record found.`);
+      }
+
+      returnedFolders.push(updateResult.rows[0].folder_id);
+    }
 
     // Commit transaction
-    await pool.query("COMMIT");
+    await client.query("COMMIT");
 
-    res.status(200).json({ message: 'Folders returned successfully', folder_ids: results });
+    return res.json({ message: "Folders returned successfully", returnedFolders });
   } catch (error) {
-    await pool.query("ROLLBACK"); // Rollback on error
-    console.error('Error returning folders:', error);
-    res.status(400).json({ message: error.message });
+    await client.query("ROLLBACK");
+    console.error(error);
+    return res.status(500).json({ message: error.message || "An error occurred while processing the request." });
+  } finally {
+    client.release();
   }
 });
+
 
 // Fetch overdue folders with collector details
 
@@ -394,14 +403,28 @@ app.get('/folders', async (req, res) => {
     const query = `
       SELECT 
         fr.*, 
-        COALESCE(ft.folder_status, 'In Store') AS folder_status
-      FROM public.folder_registration fr
-      LEFT JOIN (
-        SELECT DISTINCT ON (folder_id) folder_id, folder_status
+        COALESCE(ft.folder_status, 'In Store') AS folder_status,
+        COALESCE(fc.Collector, '') AS collected_by 
+    FROM public.folder_registration fr
+    LEFT JOIN (
+        SELECT DISTINCT ON (folder_id) 
+            folder_id, 
+            folder_status, 
+            collectedby
         FROM public.folder_transactions
         ORDER BY folder_id, date_collected DESC
-      ) ft ON fr.id = ft.folder_id
-      WHERE fr.status = 'Available';
+    ) ft ON fr.id = ft.folder_id
+    LEFT JOIN (
+        SELECT 
+            folder_transactions.folder_id,
+            CONCAT(folder_collectors.first_name, ' ', folder_collectors.other_name) AS Collector
+        FROM public.folder_transactions 
+        JOIN public.folder_collectors 
+            ON folder_transactions.collectedby = folder_collectors.foco_id
+        WHERE folder_transactions.folder_status = 'Out Store'
+    ) fc ON fr.id = fc.folder_id
+    WHERE fr.status = 'Available';
+
     `;
 
     const result = await pool.query(query);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import "./personal_table.css"
 
 const FolderManagement = () => {
   const [data, setData] = useState([]);
@@ -11,7 +12,7 @@ const FolderManagement = () => {
   const [selectedCaseManager, setSelectedCaseManager] = useState("");
   const [purposes, setPurposes] = useState([]);
   const [selectedPurpose, setSelectedPurpose] = useState("");
-  const [selectedDate, setSelectedDate] = useState(""); // Single date selection
+  const [selectedDate, setSelectedDate] = useState("");
   const rowsPerPage = 10;
 
   useEffect(() => {
@@ -68,8 +69,8 @@ const FolderManagement = () => {
         (item) =>
           String(item?.hospital_number || "").toLowerCase().includes(value) ||
           String(item?.folder_status || "").toLowerCase().includes(value) ||
+          String(item?.collected_by || "").toLowerCase().includes(value) ||
           String(item?.date_enrollment || "").toLowerCase().includes(value)
-          
       )
     );
     setCurrentPage(1);
@@ -81,6 +82,7 @@ const FolderManagement = () => {
         ? prevSelected.filter((rowId) => rowId !== id)
         : [...prevSelected, id]
     );
+    console.log("Selected Rows:", selectedRows); // Debugging
   };
 
   const assignFolders = async () => {
@@ -128,19 +130,19 @@ const FolderManagement = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ftId: selectedRows, // Fix: Use correct key name
-          returnDate: selectedDate, // Fix: Use correct key name
+          ftId: selectedRows,
+          returnDate: selectedDate,
         }),
       });
   
       if (!response.ok) {
-        const errorData = await response.json(); // Get error details
+        const errorData = await response.json();
         throw new Error(errorData.message || "Failed to return folders");
       }
   
       Swal.fire("Success", "Folders returned successfully.", "success");
-      setSelectedRows([]); // Clear selected rows
-      setSelectedDate(""); // Reset date input
+      setSelectedRows([]);
+      setSelectedDate("");
     } catch (error) {
       console.error("Error returning folders:", error);
       Swal.fire("Error", error.message || "Failed to return folders. Please try again.", "error");
@@ -202,7 +204,6 @@ function allcollectedfolders() {
     })
     .catch(error => console.error("Error downloading file:", error));
 }
-
 
   return (
     <div className="container mt-4">
@@ -274,39 +275,43 @@ function allcollectedfolders() {
         </div>
       </div>
 
-      <table className="table table-striped table-bordered table-hover">
+      <table className="personal_table table-striped table-bordered table-hover">
         <thead className="thead-dark">
           <tr>
             <th>Select</th>
             <th>Hospital Number</th>
             <th>Date Enrollment</th>
             <th>Status</th>
+            <th>Collected By</th>
           </tr>
         </thead>
         <tbody>
-          {displayedData.length > 0 ? (
-            displayedData.map((item) => (
-              <tr key={item.id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.includes(item.id)}
-                    onChange={() => handleCheckboxChange(item.id)}
-                  />
-                </td>
-                <td>{item.hospital_number}</td>
-                <td>{item.date_enrollment}</td>
-                <td>{item.folder_status || "Not Set"}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" className="text-center">
-                No matching records found
-              </td>
-            </tr>
-          )}
-        </tbody>
+  {displayedData.length > 0 ? (
+    displayedData.map((item) => {
+      const isOutStore = item.folder_status === "Out Store";
+      return (
+        <tr key={item.id} className={isOutStore ? "out-store-row" : ""}>
+          <td>
+            <input
+              type="checkbox"
+              checked={selectedRows.includes(item.id)}
+              onChange={() => handleCheckboxChange(item.id)}
+            />
+          </td>
+          <td>{item.hospital_number}</td>
+          <td>{item.date_enrollment}</td>
+          <td>{item.folder_status || "Not Set"}</td>
+          <td>{isOutStore ? item.collected_by : ""}</td>
+        </tr>
+      );
+    })
+  ) : (
+    <tr>
+      <td colSpan="5" className="text-center">No matching records found</td>
+    </tr>
+  )}
+</tbody>
+
       </table>
       <div className="d-flex justify-content-between">
         <button
