@@ -4,5 +4,9 @@ The Folder Management System is a tracking solution designed to manage the colle
 
 Currently, two official plugins are available:
 ![screen shoot](https://github.com/Orlitech/BOFMIS/blob/master/src/assets/screenshot%20front%20end%20.png)
+![screen shoot](https://github.com/Orlitech/BOFMIS/blob/master/src/assets/Screenshot%202025-02-19%20195328.png)
+![screen shoot](https://github.com/Orlitech/BOFMIS/blob/master/src/assets/Screenshot%202025-02-19%20195430.png)
+![screen shoot](https://github.com/Orlitech/BOFMIS/blob/master/src/assets/Screenshot%202025-02-19%20195450.png)
+![screen shoot](https://github.com/Orlitech/BOFMIS/blob/master/src/assets/Screenshot%202025-02-19%20195606.png)
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
