@@ -162,3 +162,50 @@
 .personal_table tbody tr:nth-child(3) { animation-delay: 0.3s; }
 .personal_table tbody tr:nth-child(4) { animation-delay: 0.4s; }
 .personal_table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+
+ /* voice search button  */
+
+ /* Microphone button animation */
+.microphone-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .microphone-btn:hover {
+    transform: scale(1.1);
+  }
+  
+  .microphone-btn.listening {
+    animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  /* Microphone icon styling */
+  .microphone-icon {
+    width: 20px;
+    height: 20px;
+    fill: #007bff; /* Blue color for the microphone icon */
+  }
+  
+  /* Listening indicator */
+  .listening-indicator {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #007bff;
+    font-weight: bold;
+  }
