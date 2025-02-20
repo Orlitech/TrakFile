@@ -113,6 +113,18 @@
     
 }
 
+.personal_table thead input [type="checkbox"] {
+    appearance: none; /* Remove default checkbox styling */
+    width: 13px;
+    height: 13px;
+    border: 1px solid #f8f9fa;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease-in-out;
+    margin-left: 20px;
+    
+}
 /* Checkbox Checkmark Animation */
 .personal_table input[type="checkbox"]::before {
     content: '';
@@ -122,6 +134,19 @@
     width: 10px;
     height: 10px;
     background-color: #2c3034;
+    border-radius: 2px;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.2s ease-in-out;
+}
+
+.personal_table thead input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: #f4f5f7;
     border-radius: 2px;
     transform: translate(-50%, -50%) scale(0);
     transition: transform 0.2s ease-in-out;

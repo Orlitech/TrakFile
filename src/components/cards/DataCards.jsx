@@ -44,7 +44,7 @@ const DataCards = () => {
   ];
 
   return (
-    <div className="col-md-8 mt-2 grid-margin">
+    <div className="col-md-8 mt-4 grid-margin">
       <div className="row">
         {cardData.map((card, index) => (
           <div className="col-md-4 mb-2 stretch-card" key={index}>
@@ -65,10 +65,10 @@ const DataCards = () => {
               }}
             >
               <div className="card-body d-flex flex-column align-items-center justify-content-center">
-                <i className={card.icon} style={{ marginBottom: "15px" }}></i>
-                <h5 className="card-title mb-2" style={{ fontSize: "1.0rem", fontWeight: "600" }}>
+                <i className={card.icon} style={{ marginBottom: "10px" }}></i>
+                <h6 className="card-title mb-2" style={{ fontSize: "1.0rem", fontWeight: "400" }}>
                   {card.title}
-                </h5>
+                </h6>
                 <h2 className="card-value" style={{ color: "#2c3e50", fontSize: "2rem", fontWeight: "700" }}>
                   {card.value}
                 </h2>

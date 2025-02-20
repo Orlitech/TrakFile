@@ -25,6 +25,7 @@ const FolderManagement = () => {
   const [selectedPurpose, setSelectedPurpose] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [isListening, setIsListening] = useState(false); // State for speech recognition
+  const [selectAll, setSelectAll] = useState(false);
   const rowsPerPage = 10;
 
   // Initialize SpeechRecognition
@@ -118,6 +119,26 @@ const FolderManagement = () => {
     fetchCaseManagers();
     fetchPurposes();
   }, []);
+
+ // Handle "Select All" checkbox change
+const handleSelectAllChange = () => {
+  if (selectAll) {
+    // Deselect all rows
+    setSelectedRows([]);
+  } else {
+    // Select all rows in the filtered data (across all pages)
+    const allRows = filteredData.map((item) => item.id);
+    setSelectedRows(allRows);
+  }
+  setSelectAll(!selectAll);
+};
+
+// Update "Select All" checkbox state when selectedRows or filteredData changes
+useEffect(() => {
+  const allRows = filteredData.map((item) => item.id);
+  const allSelected = allRows.every((id) => selectedRows.includes(id));
+  setSelectAll(allSelected);
+}, [selectedRows, filteredData]);
 
   const handleCheckboxChange = (id) => {
     setSelectedRows((prevSelected) =>
@@ -247,6 +268,8 @@ const FolderManagement = () => {
       .catch(error => console.error("Error downloading file:", error));
   }
 
+  
+
   return (
     <div className="container mt-4">
       <div className="card">
@@ -330,7 +353,19 @@ const FolderManagement = () => {
           <table className="personal_table table-striped table-bordered table-hover">
             <thead className="thead-dark">
               <tr>
-                <th>Select</th>
+              <th>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                <span style={{marginLeft: '20px'}}>Select</span>
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={handleSelectAllChange}
+                   
+                  />
+                  
+                </label>
+              </th>
+
                 <th>Hospital Number</th>
                 <th>Date Enrollment</th>
                 <th>Status</th>
