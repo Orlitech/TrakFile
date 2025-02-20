@@ -1,0 +1,44 @@
+/* Container for the image */
+.image-container {
+    overflow: hidden;
+    border-radius: 10px;
+    position: relative;
+  }
+  
+  /* Image with hover animation */
+  .animated-image {
+    width: 100%;
+    height: auto;
+    transition: transform 0.5s ease, filter 0.5s ease;
+  }
+  
+  /* Hover effect for the image */
+  .image-container:hover .animated-image {
+    transform: scale(1.1); /* Zoom in effect */
+    filter: brightness(1.2); /* Brighten the image */
+  }
+  
+  /* Weather info animation */
+  .weather-info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  
+  /* Show weather info on hover */
+  .image-container:hover .weather-info {
+    opacity: 1;
+    transform: translateY(-10px); /* Slide up effect */
+  }
+  
+  /* Folder icon animation */
+  .icon-folder {
+    transition: transform 0.3s ease;
+    
+  }
+  
+  .image-container:hover .icon-folder {
+    transform: rotate(15deg); /* Rotate the folder icon */
+  }

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import { Doughnut } from "react-chartjs-2";
+import "chart.js/auto";
+import "./CarouselCard.css"; // Create this CSS file for custom styles
 
 const ProgressBar = ({ label, value, progressClass }) => (
   <tr>
@@ -30,6 +33,7 @@ const CarouselCard = () => {
     dead: 0,
     stop: 0,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +47,8 @@ const CarouselCard = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
         Swal.fire("Error", "Failed to fetch data. Please try again later.", "error");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -58,60 +64,79 @@ const CarouselCard = () => {
     { label: "Stopped Clients", value: ((stop / expected) * 100).toFixed(2), progressClass: "bg-primary" },
   ];
 
-  return (
-    <div className="card position-relative">
-      <div className="card-body">
-        <div
-          id="detailedReports"
-          className="carousel slide detailed-report-carousel position-static pt-2"
-          data-bs-ride="carousel"
-        >
-          <div className="carousel-inner">
-            <div className="carousel-item active">
-              <div className="row">
-                <div className="col-md-12 col-xl-3 d-flex flex-column justify-content-start">
-                  <div className="ml-xl-4 mt-3">
-                    <p className="card-title">Detailed Reports</p>
-                    <h1 className="text-primary">{expected}</h1>
-                    <h3 className="font-weight-500 mb-xl-4 text-primary">Expected Folders</h3>
-                    <p className="mb-2 mb-xl-0">
-                      The total number of folders expected within the given period. Below are
-                      the statistics calculated based on this number.
-                    </p>
-                  </div>
-                </div>
+  const chartData = {
+    labels: ["Missing", "Transferred", "Deceased", "Stopped"],
+    datasets: [
+      {
+        data: [missing, transferred, dead, stop],
+        backgroundColor: ["#ff6384", "#36a2eb", "#ffce56", "#4bc0c0"],
+        hoverBackgroundColor: ["#ff6384", "#36a2eb", "#ffce56", "#4bc0c0"],
+      },
+    ],
+  };
 
-                <div className="col-md-12 col-xl-9">
-                  <div className="row">
-                    <div className="col-md-6 border-right">
-                      <div className="table-responsive mb-3 mb-md-0 mt-3">
-                        <table className="table table-borderless report-table">
-                          <tbody>
-                            {progressData.map((data, index) => (
-                              <ProgressBar
-                                key={index}
-                                label={data.label}
-                                value={data.value}
-                                progressClass={data.progressClass}
-                              />
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+  return (
+    <div className="card position-relative modern-card">
+      <div className="card-body">
+        {loading ? (
+          <div className="d-flex justify-content-center align-items-center" style={{ height: "300px" }}>
+            <div className="spinner-border text-primary" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+          </div>
+        ) : (
+          <div
+            id="detailedReports"
+            className="carousel slide detailed-report-carousel position-static pt-2"
+            data-bs-ride="carousel"
+          >
+            <div className="carousel-inner">
+              <div className="carousel-item active">
+                <div className="row">
+                  <div className="col-md-12 col-xl-3 d-flex flex-column justify-content-start">
+                    <div className="ml-xl-4 mt-3">
+                      <p className="card-title">Detailed Reports</p>
+                      <h1 className="text-primary">{expected}</h1>
+                      <h3 className="font-weight-500 mb-xl-4 text-primary">Expected Folders</h3>
+                      <p className="mb-2 mb-xl-0">
+                        The total number of folders expected within the given period. Below are
+                        the statistics calculated based on this number.
+                      </p>
                     </div>
-                    <div className="col-md-6 mt-3">
-                      <div className="doughnutchart-wrapper">
-                        <canvas id="north-america-chart"></canvas>
+                  </div>
+
+                  <div className="col-md-12 col-xl-9">
+                    <div className="row">
+                      <div className="col-md-6 border-right">
+                        <div className="table-responsive mb-3 mb-md-0 mt-3">
+                          <table className="table table-borderless report-table">
+                            <tbody>
+                              {progressData.map((data, index) => (
+                                <ProgressBar
+                                  key={index}
+                                  label={data.label}
+                                  value={data.value}
+                                  progressClass={data.progressClass}
+                                />
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                      <div id="north-america-chart-legend"></div>
+                      <div className="col-md-6 mt-3">
+                        <div className="doughnutchart-wrapper">
+                          <Doughnut data={chartData} />
+                        </div>
+                        <div id="north-america-chart-legend"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+              {/* Additional carousel-item can go here */}
             </div>
-            {/* Additional carousel-item can go here */}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

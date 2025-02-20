@@ -1,0 +1,33 @@
+.modern-card {
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .modern-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .progress-bar {
+    transition: width 0.5s ease;
+  }
+  
+  .doughnutchart-wrapper {
+    position: relative;
+    margin: auto;
+    height: 250px;
+    width: 250px;
+  }
+  
+  .carousel-item {
+    transition: opacity 0.5s ease-in-out;
+  }
+  
+  .carousel-item.active {
+    opacity: 1;
+  }
+  
+  .carousel-item:not(.active) {
+    opacity: 0;
+  }
