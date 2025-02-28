@@ -31,15 +31,20 @@ const Navbar = () => {
       <nav className="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row shadow-sm">
         {/* Logo Section */}
         <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
+          {/* Logo (visible on all screen sizes) */}
           <a className="navbar-brand brand-logo" href="/">
-            <img src={logo} className="ms-2" alt="BOFMIS Logo" />
+            <img src={logo} className="ms-0" alt="TrakFile Logo" />
           </a>
-          <a className="navbar-brand brand-logo-mini" href="/">
+
+          {/* Title (visible only on larger screens) */}
+          <h4 className="title mt-3 d-none d-lg-block" style={{ fontFamily: 'Arial, sans-serif', fontWeight: 'bold', color: '#2c3e50' }}>
+            TrakFile
+          </h4>
+
+          {/* Mini Logo (optional, for smaller screens) */}
+          <a className="navbar-brand brand-logo-mini d-lg-none" href="/">
             <img src={logo} alt="Mini Logo" />
           </a>
-          <h4 className="title mt-3" style={{ fontFamily: 'Arial, sans-serif', fontWeight: 'bold', color: '#2c3e50' }}>
-            BOFMIS
-          </h4>
         </div>
 
         {/* Navbar Menu */}

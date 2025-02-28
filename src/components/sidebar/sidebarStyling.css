@@ -26099,3 +26099,8 @@ table.dataTable tbody td.select-checkbox:after {
 }
 /*# sourceMappingURL=maps/style.css.map */
 
+/* In your global CSS or a stylesheet */
+.main-content {
+  margin-left: 250px; /* Match the width of the sidebar */
+  padding: 20px; /* Optional: Add padding for better spacing */
+}
