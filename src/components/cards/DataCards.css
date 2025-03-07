@@ -1,0 +1,98 @@
+.folder-card {
+    position: relative;
+    width: 100%;
+    max-width: 320px; /* Optimal card width */
+    background: rgba(255, 255, 255, 0.1); /* Transparent background for glass effect */
+    border-radius: 20px; /* Rounded corners */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border for glass effect */
+    backdrop-filter: blur(10px); /* Blur effect for glass morphism */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    padding: 24px;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif; /* Modern font */
+    color: #2c3e50; /* Default text color */
+    cursor: pointer;
+}
+
+.folder-card:hover {
+    transform: translateY(-10px); /* Lift card on hover */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+    background: rgba(255, 255, 255, 0.2); /* Slightly more opaque on hover */
+}
+
+.folder-tab {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    width: 60px; /* Wider tab */
+    height: 20px; /* Taller tab */
+    background: rgba(255, 255, 255, 0.2); /* Transparent tab */
+    border-radius: 10px 10px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+    backdrop-filter: blur(5px); /* Blur effect for glass morphism */
+    box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 500; /* Medium weight for better readability */
+    color: rgba(44, 62, 80, 0.8); /* Subdued color for the title */
+    margin-bottom: 12px; /* Spacing between title and value */
+}
+
+.card-value {
+    color: #2c3e50;
+    font-size: 2.5rem; /* Larger font size for emphasis */
+    font-weight: 700;
+    margin: 0; /* Remove default margin */
+}
+
+/* Gradient overlay for a modern look */
+.folder-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1)); /* Subtle gradient */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Ensure clicks go through */
+}
+
+.folder-card:hover::before {
+    opacity: 1; /* Show gradient on hover */
+}
+
+/* Optional: Add a glowing effect on hover */
+.folder-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%); /* Glow effect */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.folder-card:hover::after {
+    opacity: 1; /* Show glow on hover */
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.folder-card {
+    animation: float 4s ease-in-out infinite; /* Floating effect */
+}

@@ -4,27 +4,49 @@ import SideImage from '../cards/SideImage';
 import DataCards from '../cards/DataCards';
 import CarouselCard from '../cards/CarouselCard';
 import CollectedFo from '../cards/CollectedFo';
+import OverdueAlerts from '../OverdueAlerts';
+import Reminders from '../Reminders';
+import StorageRecommendations from '../StorageRecommendations';
+
 
 const Dashboard = () => {
   const [Count, setCount] = useState(""); // Declare the state inside the component
+  const [overdueFolders, setOverdueFolders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5000/overdue-folders/count");
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
+        // Fetch overdue count
+        const countResponse = await fetch("http://localhost:5000/overdue-folders/count");
+        if (!countResponse.ok) {
+          throw new Error("Failed to fetch overdue count");
         }
-        const result = await response.json();
-        setCount(result.overdue_count); // Set only the overdue_count value from the response
+        const countData = await countResponse.json();
+        setCount(countData.overdue_count);
+
+
+
+        // Fetch overdue folders data for display (if needed)
+        const foldersDataResponse = await fetch("http://localhost:5000/overdue-folders/data"); // Add this endpoint in your backend
+        if (!foldersDataResponse.ok) {
+          throw new Error("Failed to fetch overdue folders data");
+        }
+        const foldersData = await foldersDataResponse.json();
+        setOverdueFolders(foldersData);
       } catch (error) {
+        setError(error.message);
         Swal.fire("Error", "Failed to fetch data. Please try again later.", "error");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData(); // Call fetchData on mount
-
+    fetchData();
   }, []);
+
   const CurrentDate = () => {
     const today = new Date();
     const formattedDate = today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
@@ -65,12 +87,17 @@ const Dashboard = () => {
             </div>
           </div>
 
+        {/* New Components */}
+        <OverdueAlerts overdueFolders={overdueFolders} />
+        <Reminders />
+        
 
           <div className="row">
 
               <SideImage />
               <DataCards />
               <CarouselCard />
+              <StorageRecommendations />
               <CollectedFo />
           </div>
                    

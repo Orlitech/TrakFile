@@ -1,0 +1,139 @@
+/* Container for the notification with faded background */
+.reminder-notification-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Faded background */
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(10px); /* Adds blur to the background */
+}
+
+/* Notification box with glass morphism and centered */
+.reminder-notification {
+  width: 360px; /* Slightly wider for better readability */
+  background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15); /* Layered shadows for depth */
+  animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(10px); /* Adds blur to the notification itself */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border for glass effect */
+  overflow: hidden;
+}
+
+/* Header section with deep blue gradient */
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px; /* Slightly more padding */
+  background: linear-gradient(145deg, #2c3e50, #34495e); /* Deep blue gradient */
+  color: #ffffff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for 3D effect */
+}
+
+.notification-header strong {
+  font-size: 18px; /* Slightly larger font */
+  font-weight: 600;
+}
+
+.notification-close {
+  cursor: pointer;
+  font-size: 24px; /* Slightly larger close icon */
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.notification-close:hover {
+  opacity: 0.8;
+}
+
+/* Body section with light gray background */
+.notification-body {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.notification-body p {
+  margin: 0 0 16px; /* Slightly more spacing */
+  font-size: 14px;
+  color: #333333;
+  line-height: 1.5; /* Better readability */
+}
+
+/* Folder list with subtle gray background */
+.folder-list {
+  max-height: 400px; /* Reduced height for better proportion */
+  overflow-y: auto;
+}
+
+.folder-item {
+  padding: 10px 16px; /* Slightly more padding */
+  margin-bottom: 8px;
+  background: rgba(245, 248, 250, 0.9); /* Semi-transparent light gray */
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333333;
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border for glass effect */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+}
+
+.folder-item:hover {
+  background-color: rgba(225, 232, 237, 0.9); /* Semi-transparent hover */
+  transform: translateY(-2px); /* Slight lift on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* View All button with deep blue gradient */
+.view-all-button {
+  display: block;
+  width: 100%;
+  padding: 12px; /* Slightly more padding */
+  margin-top: 16px; /* Slightly more spacing */
+  background: linear-gradient(145deg, #2c3e50, #34495e); /* Deep blue gradient */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+}
+
+.view-all-button:hover {
+  background: linear-gradient(145deg, #34495e, #2c3e50); /* Gradient hover effect */
+  transform: translateY(-2px); /* Slight lift on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px); /* Slide down from top */
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

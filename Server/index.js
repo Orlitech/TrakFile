@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 5000;
+const port = 5020;
 const pool = require('./dbconnection');
 const cors = require('cors');
 const path = require('path');
@@ -11,6 +11,55 @@ app.use(cors());
 app.use(express.json());
 
 // ROUTE
+app.get('/weekly-trend', async (req, res) => {
+  try {
+    const { week } = req.query; // Expects a date in YYYY-MM-DD format
+    const startOfWeek = new Date(week);
+    if (isNaN(startOfWeek.getTime())) {
+      throw new Error("Invalid date format");
+    }
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Start of the week (Sunday)
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 6); // End of the week (Saturday)
+
+    // Query to fetch data for the selected week
+    const query = `
+      SELECT 
+        Date(DATE_TRUNC('day', date_collected)) AS date,
+        COUNT(*) AS files_moved
+      FROM folder_transactions
+      WHERE date(date_collected) >= $1 AND date(date_collected) <= $2
+      GROUP BY date(DATE_TRUNC('day', date_collected))
+      ORDER BY date ASC;
+    `;
+
+    const result = await pool.query(query, [startOfWeek, endOfWeek]);
+
+    if (result.rows.length === 0) {
+      // If no data for the selected week, fetch data for the last week with transactions
+      const fallbackQuery = `
+        SELECT 
+          Date(DATE_TRUNC('day', date_collected)) AS date,
+          COUNT(*) AS files_moved
+        FROM folder_transactions
+        WHERE date_collected < $1
+        GROUP BY DATE_TRUNC('day', date_collected)
+        ORDER BY date DESC
+        LIMIT 7;
+      `;
+
+      const fallbackResult = await pool.query(fallbackQuery, [startOfWeek]);
+      res.json(fallbackResult.rows.reverse()); // Return the last week's data
+    } else {
+      res.json(result.rows);
+    }
+  } catch (error) {
+    console.error('Error fetching weekly trend data:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.post('/assign', async (req, res) => {
   const { folder_id, purpose_id, collectedby, date_collected } = req.body;
@@ -117,10 +166,13 @@ app.post('/return-folder', async (req, res) => {
 
 
 // Fetch overdue folders with collector details
-
+// Get overdue folders with Excel export
 app.get('/overdue-folders', async (req, res) => {
   try {
-    const query = `
+    const { page = 1, limit = 10, collectorName } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = `
       SELECT 
         fc.first_name || ' ' || COALESCE(fc.other_name, '') AS collector_name, 
         fc.phone, 
@@ -133,21 +185,29 @@ app.get('/overdue-folders', async (req, res) => {
       WHERE ft.date_returned IS NULL 
         AND ft.folder_status = 'Out Store' 
         AND ft.date_collected < NOW() - INTERVAL '2 days'
-      GROUP BY fc.foco_id, fc.first_name, fc.other_name, fc.phone
     `;
 
-    const result = await pool.query(query);
+    if (collectorName) {
+      query += ` AND fc.first_name ILIKE $1`;
+    }
+
+    query += `
+      GROUP BY fc.foco_id, fc.first_name, fc.other_name, fc.phone
+      LIMIT $${collectorName ? 2 : 1} OFFSET $${collectorName ? 3 : 2}
+    `;
+
+    const params = collectorName ? [`%${collectorName}%`, limit, offset] : [limit, offset];
+    const result = await pool.query(query, params);
     const overdueFolders = result.rows;
 
     if (overdueFolders.length === 0) {
       return res.status(200).json({ message: 'No overdue folders found.' });
     }
 
-    // Create an Excel workbook and sheet
+    // Create Excel workbook
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Overdue Folders');
 
-    // Define headers
     worksheet.columns = [
       { header: 'Collector Name', key: 'collector_name', width: 25 },
       { header: 'Phone Number', key: 'phone', width: 15 },
@@ -156,39 +216,30 @@ app.get('/overdue-folders', async (req, res) => {
       { header: 'Folder List', key: 'folder_list', width: 50 }
     ];
 
-    // Add rows
-    overdueFolders.forEach(folder => {
-      worksheet.addRow(folder);
-    });
+    overdueFolders.forEach(folder => worksheet.addRow(folder));
 
-    // ✅ Save the file in a **writable location**
-    const tempDir = os.tmpdir(); // Uses system temp directory
+    const tempDir = os.tmpdir();
     const filePath = path.join(tempDir, 'overdue_folders.xlsx');
 
     await workbook.xlsx.writeFile(filePath);
 
-    // ✅ Send the file to the client
     res.download(filePath, 'overdue_folders.xlsx', (err) => {
       if (err) {
         console.error('Error sending file:', err);
         return res.status(500).json({ message: 'Error generating Excel file' });
       }
 
-      // ✅ Delete file after download to free up space
       setTimeout(() => {
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       }, 5000);
     });
 
   } catch (error) {
-    console.error('Error fetching overdue folders:', error);
-    res.status(500).json({ message: 'Error fetching overdue folders', error: error.message });
+    next(error);
   }
 });
 
-
-// count overdue 
-
+// Count overdue folders
 app.get('/overdue-folders/count', async (req, res) => {
   try {
     const query = `
@@ -203,11 +254,54 @@ app.get('/overdue-folders/count', async (req, res) => {
     res.json({ overdue_count: rows[0].total_overdue });
 
   } catch (error) {
-    console.error('Error fetching overdue folder count:', error);
-    res.status(500).json({ message: 'Error fetching overdue folder count', error: error.message });
+    next(error);
   }
 });
 
+app.listen(5000, () => {
+  console.log('Server is running on port 5000');
+});
+
+
+
+app.get('/reminders', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        fr.id AS folder_id,
+        fr.hospital_number AS folder_name,
+        TRIM(fc.first_name || ' ' || COALESCE(fc.other_name, '')) AS collector_name,
+        ft.date_collected,
+        'File Store' AS expected_return_location
+      FROM folder_transactions ft
+      JOIN folder_registration fr ON fr.id = ft.folder_id
+      JOIN folder_collectors fc ON ft.collectedby = fc.foco_id
+      WHERE ft.date_returned IS NULL 
+        AND ft.folder_status = 'Out Store'
+      ORDER BY ft.date_collected ASC
+    `;
+
+    const result = await pool.query(query);
+
+    if (!result.rows) {
+      console.error("Database query returned no rows.");
+      return res.status(404).json({ error: "No reminders found" });
+    }
+
+    const reminders = result.rows.map((row) => ({
+      id: row.folder_id,
+      name: row.folder_name,
+      collector: row.collector_name,
+      collectedDate: row.date_collected,
+      returnLocation: row.expected_return_location,
+    }));
+
+    res.json(reminders);
+  } catch (error) {
+    console.error('Error fetching reminders:', error.stack);
+    res.status(500).json({ error: "Failed to fetch reminders", details: error.message });
+  }
+});
 
 
 
